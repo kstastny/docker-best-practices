@@ -60,7 +60,7 @@ This will print "Hello from Docker" and some informational messages if the insta
 
 ## How to Change Location of Virtual Hard Drives
 
-Since I have a small system disk, I prefer moving the VHDs to a different harddrive to save space on the system.
+I have a small system disk, therefore I prefer moving the VHDs to a different harddrive to save space on the system.
 
 1. Shutdown the WSL image. Let's assume that its name is "Ubuntu"
    
@@ -84,3 +84,54 @@ Since I have a small system disk, I prefer moving the VHDs to a different harddr
 ### Source
 
 https://stackoverflow.com/questions/62441307/how-can-i-change-the-location-of-docker-images-when-using-docker-desktop-on-wsl2
+
+
+## Basic commands
+
+
+### Bash into container
+
+`docker exec -it CONTAINER_ID bash`
+
+
+## Multistage build
+
+Multistage builds are useful for building image files that only contain the application and not any residual files used during the build. Usually the usage is such that in the first stage (docker container) the application is built, then the second stage just copies the built files and the first container is dropped.
+
+For example, we can setup multistage build like below
+
+```docker
+FROM mcr.microsoft.com/dotnet/sdk:5.0 as build
+
+# Install node
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash
+RUN apt-get update && apt-get install -y nodejs
+RUN npm install yarn --global
+
+RUN yarn --version
+
+WORKDIR /workspace
+COPY . .
+RUN dotnet tool restore
+
+RUN dotnet fake build -t Publish
+
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+COPY --from=build /workspace/publish/app /app
+WORKDIR /app
+EXPOSE 8085
+ENTRYPOINT [ "dotnet", "Alexandria.Server.dll" ]
+```
+
+In the first stage, `build`, the application is built in .net SDK image.
+The second stage takes the output from the build stage and creates a container that only contains the built application.
+
+This approach has several advantages
+* Resulting docker image is smaller because it does not contain SDK and other dependencies needed for build
+* no source code is left on the image
+* the build is reproducible on every machine running docker. There is no need for special setup of the build server
+
+### Source
+
+https://docs.docker.com/develop/develop-images/multistage-build/
