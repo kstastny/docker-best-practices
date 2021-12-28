@@ -98,7 +98,7 @@ https://stackoverflow.com/questions/62441307/how-can-i-change-the-location-of-do
 
 Multistage builds are useful for building image files that only contain the application and not any residual files used during the build. Usually the usage is such that in the first stage (docker container) the application is built, then the second stage just copies the built files and the first container is dropped.
 
-For example, we can setup multistage build like below
+For example, we can setup multistage build like below (example taken from https://github.com/kstastny/alexandria repo)
 
 ```docker
 FROM mcr.microsoft.com/dotnet/sdk:5.0 as build
@@ -132,6 +132,80 @@ This approach has several advantages
 * no source code is left on the image
 * the build is reproducible on every machine running docker. There is no need for special setup of the build server
 
-### Source
+### Sources
 
-https://docs.docker.com/develop/develop-images/multistage-build/
+* https://docs.docker.com/develop/develop-images/multistage-build/
+
+
+## Docker Compose
+
+Applications usually don't run in isolation but have to communicate with other services, be it a database, message queue or other applications.
+
+It would be very unwieldy to run everything in one container, therefore we have to separate the services into one container per service. This gives us several advantages
+
+* services can be developed, updated and versioned separately
+* we have flexibility during deployment (e.g. we can use container database for local development and managed service for production deployment)
+* services can be scaled separately
+
+We could create the containers manually and connect them using [docker network](https://docs.docker.com/network) but that would be unwieldy and error prone. That is where [docker compose](https://docs.docker.com/compose/) comes in. It allows us to define an application "stack" in one YAML file and start all the services in said stack using a single command.
+
+An example `docker-compose.yaml` file looks for https://github.com/kstastny/alexandria development looks like this.
+
+```yaml
+# format version https://docs.docker.com/compose/compose-file/compose-versioning/
+version: '3.8'
+
+# define list of services (containers) that compose our application
+services:
+
+  #identifier of database service  
+  db:
+    #Specify what image and version we should use; we use 10.5 due to https://jira.mariadb.org/browse/MDEV-26105
+    image: mariadb:10.5
+    #container restart policy https://docs.docker.com/config/containers/start-containers-automatically/
+    restart: always
+    #setup environment variables
+    environment:
+      MYSQL_ROOT_PASSWORD: mariadbexamplepassword
+    #define port forwarding (host:container)
+    ports:
+      - 3306:3306
+    #bind volume `alexandria-db` to directory `/var/lib/mysql`
+    volumes:
+      - alexandria-db:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8090:8080
+
+#define volumes necessary
+volumes:
+  #named volume will be created automatically if it does not exist. Otherwise it is mounted
+  alexandria-db:
+```
+
+This file defines the infrastructure necessary for running [Alexandria](https://github.com/kstastny/alexandria) locally. I can now easily run the infrastructure and develop against it.
+
+To run the infrastructure, execute
+
+> `docker-compose up --build -d`
+
+
+
+
+
+
+`docker-compose logs -ft alexandria` 
+
+
+TODO example that includes alexandria and uses .env file
+ - INCLUDING DEPENDS_ON
+
+
+
+### Sources
+
+* https://docs.docker.com/compose/
+
