@@ -149,6 +149,8 @@ It would be very unwieldy to run everything in one container, therefore we have 
 
 We could create the containers manually and connect them using [docker network](https://docs.docker.com/network) but that would be unwieldy and error prone. That is where [docker compose](https://docs.docker.com/compose/) comes in. It allows us to define an application "stack" in one YAML file and start all the services in said stack using a single command.
 
+### Docker Compose for Infrastructure
+
 An example `docker-compose.yaml` file looks for https://github.com/kstastny/alexandria development looks like this.
 
 ```yaml
@@ -192,18 +194,48 @@ To run the infrastructure, execute
 
 > `docker-compose up --build -d`
 
+This will compose the whole infrastructure stack and run it in the background. 
+
+### Docker Compose for Application
+
+If we want to run the whole application stack in one compose, for purpose of easy testing, we can just add the following service to define our docker-compose.yml.
+
+```yaml
+  alexandria:
+    build:
+      # build context. Either local directory or url to git repository
+      context: .
+      dockerfile: Dockerfile
+    #https://docs.docker.com/compose/startup-order/
+    depends_on:
+      - "db"
+    command: ["./wait-for-it.sh", "db:3306", "--", "python", "app.py"]
+    ports:
+      - 8080:5000
+    environment:
+      DB__CONNECTIONSTRING: Server=db;Port=3306;Database=alexandria;Uid=root;Pwd=${MYSQL_ROOT_PASSWORD};SslMode=none
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+```
+
+This time we have used environment variable inject the database password (just for demonstration purposes).
+For local run, we can store this variable in and .env file
+
+```
+MYSQL_PASSWORD=mariadbexamplepassword
+```
+
+and run the whole stack like this:
+> `docker-compose --env-file .env up --build -d`
+
+After everything is built, we can check the application logs using `docker-compose logs` command:
+> `docker-compose logs -ft alexandria` 
 
 
+Note that using environment variables is not ideal for passing sensitive data. Better way would be to use Docker secrets (example coming later :))
 
 
-
-`docker-compose logs -ft alexandria` 
-
-
-TODO example that includes alexandria and uses .env file
- - INCLUDING DEPENDS_ON
-
-
+We can of course have both the file with infrastructure and application defined and choose which one to run on our leisure
+> `docker-compose --env-file .env up --file docker-compose.infrastructure.yml --build -d`
 
 ### Sources
 
