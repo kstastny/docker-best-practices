@@ -182,10 +182,7 @@ services:
     ports:
       - 8090:8080
 
-#define volumes necessary
-volumes:
-  #named volume will be created automatically if it does not exist. Otherwise it is mounted
-  alexandria-db:
+
 ```
 
 This file defines the infrastructure necessary for running [Alexandria](https://github.com/kstastny/alexandria) locally. I can now easily run the infrastructure and develop against it.
@@ -240,4 +237,86 @@ We can of course have both the file with infrastructure and application defined 
 ### Sources
 
 * https://docs.docker.com/compose/
+
+
+## Persisting data
+
+Data can be persisted between container restarts using either *volumes* or *bind mounts*.
+
+1. **Volumes** are created and managed by Docker
+1. **Bind Mounts** are directories or files mounted to docker container from host system
+
+### Volumes
+
+Volumes are preferred way for persisting data. They are fully managed by Docker and no external process should touch the filesystem path where the volumes are created. Once created, the volumes are kept on disk so the data is kept even between container runs.
+
+* data can be shared between containers, even two containers running at the same time can access the same volume
+* are managed by docker so the Docker container controls the directory and file structure
+* easy backup (either `/var/lib/docker/volumes/<volume-name>` or see below)
+
+
+
+Create a volume
+
+> docker volume create alexandria-db
+
+To start a container with volume, use flag `-v` with parameters name of volume and path where it will mount:
+
+> docker run -dp 3306:3306 --name dbtest -v alexandria-db:/var/lib/mysql -e "MARIADB_ROOT_PASSWORD=test" mariadb:10.5
+
+
+#### Volumes and docker-compose
+
+* Volumes specified in `docker-compose.yml` are created automatically
+* Even anonymous volumes are picked up by docker compose
+
+Volume may also be created outside of docker compose using `docker volume create` and then referenced in `docker-compose.yml`
+
+```yaml
+#define volumes necessary
+volumes:
+  #named volume will be created automatically if it does not exist. Otherwise it is mounted
+  alexandria-db:
+    external: true
+```  
+
+If the `external` flag is set to true,then docker-compose up does not attempt to create it, and raises an error if it doesn’t exist.
+
+
+#### Back up volume data
+
+Example - backup and restore `etc/todos` from volume in container `eloquent_tereshkova` to c:/temp/bak.
+Then restore the directory to containervolume `todo2`:
+
+Run container, mount volumes from said container, bind mount host directory and tar directory `/etc/todos`:
+```bash
+docker run --rm --volumes-from eloquent_tereshkova -v c/temp/bak:/backup ubuntu tar cvf /backup/backup.tar /etc/todos
+```
+
+Untar the backed data into new container:
+```bash
+docker run --rm --volumes-from todo2 -v c/temp/bak:/backup ubuntu bash -c "cd / && tar xvf /backup/backup.tar --strip 0"
+```
+
+
+### Bind mounts
+
+Bind Mount specifies file or directory from host computer that is mounted into the running container. This means that the Docker process has no such control and in general this way is slower (see https://docs.docker.com/storage/#good-use-cases-for-volumes for reasons).
+There are still good use case for Bind mounts:
+
+* sharing configuration
+* sharing source code during development - you may mount your source code into a Docker container where the build happens while at the same time using your IDE to edit the code
+
+
+use `-v` flag to bind mount existing directory to container:
+
+For examples:
+`docker run -d -it -name devtest -v "$(pwd)":/app nginx:latest`
+
+
+### Sources
+
+* https://docs.docker.com/storage/
+* https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes
+* https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference
 
