@@ -234,6 +234,19 @@ Note that using environment variables is not ideal for passing sensitive data. B
 We can of course have both the file with infrastructure and application defined and choose which one to run on our leisure
 > `docker-compose --env-file .env up --file docker-compose.infrastructure.yml --build -d`
 
+
+### Combining docker compose files
+
+It is also possible to combine multiple docker-compose files and run them with one command. The files specified later override values of files preceding them. 
+Continuing the example above, we can specify the yaml in two separate files
+* `docker-compose.infrastructure.yml`
+* `docker-compose.app.yml`
+
+and run the whole stack with one command:
+
+> `docker-compose -f docker-compose.infrastructure.yml -f docker-compose.app.yml --env-file .env up --build -d`
+
+
 ### Sources
 
 * https://docs.docker.com/compose/
@@ -320,3 +333,18 @@ For examples:
 * https://docs.docker.com/storage/volumes/#backup-restore-or-migrate-data-volumes
 * https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference
 
+
+## Docker network
+
+While the containers are independent, sometimes they need to be able to talk to each other. The answer to that need is `docker network`. For two containers to talk to each other, they have to be on the same network.
+
+To create the network
+> docker network create alexandria_default
+
+
+To run a container at specified network, use the `--network` flag. The `--network-alias` specifies how the container is identified in the network so we can find it.
+
+> docker run -dp 3306:3306 --network alexandria_default --network-alias db --name dbtest -v alexandria-db:/var/lib/mysql -e "MARIADB_ROOT_PASSWORD=test" mariadb:10.5
+
+
+For development purposes, I don't usually define the networks manually. When using `docker-compose`, the network is created automatically and that is enough for most cases.
