@@ -348,3 +348,17 @@ To run a container at specified network, use the `--network` flag. The `--networ
 
 
 For development purposes, I don't usually define the networks manually. When using `docker-compose`, the network is created automatically and that is enough for most cases.
+
+
+## Push image into registry
+
+Login to docker hub
+
+> docker login -u kstastny
+
+Tag the image locally
+
+> docker tag alexandria_alexandria kstastny/alexandria:latest
+
+push to registry
+> docker push kstastny/alexandria:latest
