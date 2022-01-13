@@ -3,31 +3,30 @@
 
 _Documentation of best practices for working with Docker according to my personal preferences. Please note that I use Windows for development, therefore the documentation is suited towards that end._
 
-
 <!-- vscode-markdown-toc -->
-* 1. [Installation](#Installation)
+* 1.[Installation](#Installation)
 	* 1.1. [Setup WSL distribution](#SetupWSLdistribution)
 	* 1.2. [Install Docker](#InstallDocker)
 	* 1.3. [Sources](#Sources)
-* 2. [How to Change Location of Virtual Hard Drives](#HowtoChangeLocationofVirtualHardDrives)
+* 2.[How to Change Location of Virtual Hard Drives](#HowtoChangeLocationofVirtualHardDrives)
 	* 2.1. [Source](#Source)
-* 3. [Basic commands](#Basiccommands)
+* 3.[Basic commands](#Basiccommands)
 	* 3.1. [Bash into container](#Bashintocontainer)
 * 4. [Multistage build](#Multistagebuild)
 	* 4.1. [Sources](#Sources-1)
-* 5. [Docker Compose](#DockerCompose)
+* 5.[Docker Compose](#DockerCompose)
 	* 5.1. [Docker Compose for Infrastructure](#DockerComposeforInfrastructure)
 	* 5.2. [Docker Compose for Application](#DockerComposeforApplication)
 	* 5.3. [Combining docker compose files](#Combiningdockercomposefiles)
 	* 5.4. [Sources](#Sources-1)
-* 6. [Persisting data](#Persistingdata)
+* 6.[Persisting data](#Persistingdata)
 	* 6.1. [Volumes](#Volumes)
 		* 6.1.1. [Volumes and docker-compose](#Volumesanddocker-compose)
 		* 6.1.2. [Back up volume data](#Backupvolumedata)
 	* 6.2. [Bind mounts](#Bindmounts)
 	* 6.3. [Sources](#Sources-1)
-* 7. [Docker network](#Dockernetwork)
-* 8. [Push image into registry](#Pushimageintoregistry)
+* 7.[Docker network](#Dockernetwork)
+* 8.[Push image into registry](#Pushimageintoregistry)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
