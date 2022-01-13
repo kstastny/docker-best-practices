@@ -12,34 +12,49 @@ To install WSL, see https://docs.microsoft.com/en-us/windows/wsl/install
 
 1. Install Ubuntu
 
-    `wsl --install -d Ubuntu`
+```bash
+wsl --install -d Ubuntu
+```
 
 1. After installation, login to the new distribution and choose username and password. The prompt should open automatically.
 1. Update and upgrade packages
 
-    `sudo apt update && sudo apt upgrade`
+```bash
+sudo apt update && sudo apt upgrade
+```
 
 
 ### Install Docker
 
 1. Install pre-requisities
 
-    `sudo apt install --no-install-recommends apt-transport-https ca-certificates curl gnupg2`
+  ```bash
+  sudo apt install --no-install-recommends apt-transport-https ca-certificates curl gnupg2`
+  ```
 
 1. Trust the docker repo with packages
     1. set temporary OS-specific variables
-        
-        `source /etc/os-release`
-    1. Trust the repo
-        
-        `curl -fsSL https://download.docker.com/linux/${ID}/gpg | sudo apt-key add -`
-    1. Add and update the repo information
+        ```bash        
+          source /etc/os-release
+        ```
 
-        `echo "deb [arch=amd64] https://download.docker.com/linux/${ID} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list`  
-        `sudo apt update`
+    1. Trust the repo        
+        ```bash
+        curl -fsSL https://download.docker.com/linux/${ID}/gpg | sudo apt-key add -
+        ```
+
+    1. Add and update the repo information
+      ```bash        
+          echo "deb [arch=amd64] https://download.docker.com/linux/${ID} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list
+      ```    
+      ```bash        
+          sudo apt update
+      ```
 
 1. Install Docker itself
-    `sudo apt install docker-ce docker-ce-cli containerd.io docker-compose`
+      ```bash        
+      sudo apt install docker-ce docker-ce-cli containerd.io docker-compose
+      ```
 
 Now, you should configure the user permissions and setup docker daemon to autorun but since I tend to launch docker daemon manually, I will skip this step and just point you to [https://dev.to/bowmanjd/install-docker-on-windows-wsl-without-docker-desktop-34m9](Jonathan Bowman's tutorial)
 
@@ -63,20 +78,24 @@ This will print "Hello from Docker" and some informational messages if the insta
 I have a small system disk, therefore I prefer moving the VHDs to a different harddrive to save space on the system.
 
 1. Shutdown the WSL image. Let's assume that its name is "Ubuntu"
-   
-    `wsl --shutdown`
+    ```bash 
+    wsl --shutdown
+    ```
 
 1. Export the image data
-
-    `wsl --export Ubuntu "D:\DockerDesktop-vm-data\Ubuntu.tar"`
+    ```bash 
+    wsl --export Ubuntu "D:\DockerDesktop-vm-data\Ubuntu.tar"
+    ```
 
 1. Unregister the image. Note that the ext4.vhdx will be removed automatically.
-
-    `wsl --unregister Ubuntu`
+    ```bash 
+    wsl --unregister Ubuntu
+    ```
 
 1. Import the WSL image to different directory.
-
-    `wsl --import Ubuntu "D:\DockerDesktop-vm-data\wsl" "D:\DockerDesktop-vm-data\Ubuntu.tar" --version 2`
+    ```bash 
+    wsl --import Ubuntu "D:\DockerDesktop-vm-data\wsl" "D:\DockerDesktop-vm-data\Ubuntu.tar" --version 2
+    ```
 
 1. Run the WSL distribution and verify. You may now remove the `Ubuntu.tar` file    
 
@@ -90,8 +109,9 @@ https://stackoverflow.com/questions/62441307/how-can-i-change-the-location-of-do
 
 
 ### Bash into container
-
-`docker exec -it CONTAINER_ID bash`
+```bash 
+docker exec -it CONTAINER_ID bash
+```
 
 
 ## Multistage build
@@ -189,7 +209,9 @@ This file defines the infrastructure necessary for running [Alexandria](https://
 
 To run the infrastructure, execute
 
-> `docker-compose up --build -d`
+```bash 
+docker-compose up --build -d
+```
 
 This will compose the whole infrastructure stack and run it in the background. 
 
@@ -222,17 +244,23 @@ MYSQL_PASSWORD=mariadbexamplepassword
 ```
 
 and run the whole stack like this:
-> `docker-compose --env-file .env up --build -d`
+```bash 
+docker-compose --env-file .env up --build -d
+```
 
 After everything is built, we can check the application logs using `docker-compose logs` command:
-> `docker-compose logs -ft alexandria` 
+```bash 
+docker-compose logs -ft alexandria
+```
 
 
 Note that using environment variables is not ideal for passing sensitive data. Better way would be to use Docker secrets (example coming later :))
 
 
 We can of course have both the file with infrastructure and application defined and choose which one to run on our leisure
-> `docker-compose --env-file .env up --file docker-compose.infrastructure.yml --build -d`
+```bash
+docker-compose --env-file .env up --file docker-compose.infrastructure.yml --build -d`
+```
 
 
 ### Combining docker compose files
@@ -244,7 +272,9 @@ Continuing the example above, we can specify the yaml in two separate files
 
 and run the whole stack with one command:
 
-> `docker-compose -f docker-compose.infrastructure.yml -f docker-compose.app.yml --env-file .env up --build -d`
+```bash 
+docker-compose -f docker-compose.infrastructure.yml -f docker-compose.app.yml --env-file .env up --build -d
+```
 
 
 ### Sources
@@ -268,14 +298,15 @@ Volumes are preferred way for persisting data. They are fully managed by Docker 
 * easy backup (either `/var/lib/docker/volumes/<volume-name>` or see below)
 
 
-
 Create a volume
-
-> docker volume create alexandria-db
+```bash
+docker volume create alexandria-db
+```
 
 To start a container with volume, use flag `-v` with parameters name of volume and path where it will mount:
-
-> docker run -dp 3306:3306 --name dbtest -v alexandria-db:/var/lib/mysql -e "MARIADB_ROOT_PASSWORD=test" mariadb:10.5
+```bash
+docker run -dp 3306:3306 --name dbtest -v alexandria-db:/var/lib/mysql -e "MARIADB_ROOT_PASSWORD=test" mariadb:10.5
+```
 
 
 #### Volumes and docker-compose
@@ -323,8 +354,10 @@ There are still good use case for Bind mounts:
 
 use `-v` flag to bind mount existing directory to container:
 
-For examples:
-`docker run -d -it -name devtest -v "$(pwd)":/app nginx:latest`
+For example:
+```bash
+docker run -d -it -name devtest -v "$(pwd)":/app nginx:latest
+```
 
 
 ### Sources
@@ -354,11 +387,17 @@ For development purposes, I don't usually define the networks manually. When usi
 
 Login to docker hub
 
-> docker login -u kstastny
+```bash
+docker login -u kstastny
+```
 
 Tag the image locally
 
-> docker tag alexandria_alexandria kstastny/alexandria:latest
+```bash
+docker tag alexandria_alexandria kstastny/alexandria:latest
+```
 
 push to registry
-> docker push kstastny/alexandria:latest
+```bash
+docker push kstastny/alexandria:latest
+```
