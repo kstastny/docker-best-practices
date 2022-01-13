@@ -12,7 +12,7 @@ _Documentation of best practices for working with Docker according to my persona
 	* 2.1. [Source](#Source)
 * 3.[Basic commands](#Basiccommands)
 	* 3.1. [Bash into container](#Bashintocontainer)
-* 4. [Multistage build](#Multistagebuild)
+* 4.[Multistage build](#Multistagebuild)
 	* 4.1. [Sources](#Sources-1)
 * 5.[Docker Compose](#DockerCompose)
 	* 5.1. [Docker Compose for Infrastructure](#DockerComposeforInfrastructure)
