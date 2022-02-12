@@ -234,7 +234,8 @@ services:
     ports:
       - 8090:8080
 
-
+volumes:
+  alexandria-db:
 ```
 
 This file defines the infrastructure necessary for running [Alexandria](https://github.com/kstastny/alexandria) locally. I can now easily run the infrastructure and develop against it.
