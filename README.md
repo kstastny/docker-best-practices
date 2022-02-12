@@ -88,7 +88,7 @@ sudo apt update && sudo apt upgrade
       sudo apt install docker-ce docker-ce-cli containerd.io docker-compose
       ```
 
-Now, you should configure the user permissions and setup docker daemon to autorun but since I tend to launch docker daemon manually, I will skip this step and just point you to [https://dev.to/bowmanjd/install-docker-on-windows-wsl-without-docker-desktop-34m9](Jonathan Bowman's tutorial)
+Now, you should configure the user permissions and setup docker daemon to autorun but since I tend to launch docker daemon manually, I will skip this step and just point you to [Jonathan Bowman's tutorial](https://dev.to/bowmanjd/install-docker-on-windows-wsl-without-docker-desktop-34m9).
 
 
 To verify the installation
