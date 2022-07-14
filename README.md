@@ -61,7 +61,7 @@ sudo apt update && sudo apt upgrade
 1. Install pre-requisities
 
   ```bash
-  sudo apt install --no-install-recommends apt-transport-https ca-certificates curl gnupg2`
+  sudo apt install --no-install-recommends apt-transport-https ca-certificates curl gnupg2
   ```
 
 1. Trust the docker repo with packages
